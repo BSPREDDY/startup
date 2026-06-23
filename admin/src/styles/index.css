@@ -21,28 +21,96 @@ code {
         monospace;
 }
 
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 5px rgba(0, 153, 255, 0.3),
+            inset 0 0 5px rgba(0, 153, 255, 0.1);
+    }
+
+    50% {
+        box-shadow:
+            0 0 20px rgba(0, 153, 255, 0.6),
+            inset 0 0 10px rgba(0, 153, 255, 0.2);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes data-stream {
+    0% {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
 @layer utilities {
     .sidebar-active {
         @apply bg-blue-600 text-white border-r-4 border-yellow-400 font-semibold;
     }
 
     .table-row-hover {
-        @apply hover:bg-slate-700 transition-colors duration-200;
+        @apply hover:bg-slate-700/50 transition-colors duration-200;
     }
 
     .admin-card {
-        @apply bg-gradient-to-br from-slate-800 to-slate-700 border border-slate-600 rounded-lg shadow-xl;
+        @apply bg-gradient-to-br from-slate-800/80 to-slate-700/80 backdrop-blur-sm border border-blue-500/20 rounded-lg shadow-xl;
     }
 
     .admin-input {
-        @apply w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all;
+        @apply w-full px-4 py-2 bg-slate-700/50 border border-blue-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all;
     }
 
     .admin-button {
-        @apply px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl;
+        @apply px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl hover:scale-105;
     }
 
     .admin-button-secondary {
-        @apply px-4 py-2 bg-slate-700 text-white rounded-lg font-medium hover:bg-slate-600 transition-colors border border-slate-600;
+        @apply px-4 py-2 bg-slate-700/60 text-white rounded-lg font-medium hover:bg-slate-600/80 transition-all border border-slate-600/50 backdrop-blur-sm;
+    }
+
+    .glow-effect {
+        animation: glow-pulse 3s ease-in-out infinite;
+    }
+
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .data-stream-animation {
+        animation: data-stream 4s ease-in-out infinite;
+    }
+
+    .transition-smooth {
+        @apply transition-all duration-300 ease-out;
+    }
+
+    .glass-effect {
+        @apply bg-white/10 backdrop-blur-xl border border-white/20;
+    }
+
+    .gradient-text {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-yellow-400;
     }
 }
