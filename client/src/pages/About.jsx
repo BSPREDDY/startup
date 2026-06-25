@@ -18,7 +18,7 @@ export default function About() {
             </Helmet>
 
             {/* Hero Section with Gradient Background */}
-            <section className="relative h-96 flex items-center justify-center overflow-hidden bg-gradient-to-r from-blue-900 via-slate-900 to-purple-900">
+            <section className="relative h-96 flex items-center justify-center overflow-hidden">
                 <div className="text-center px-6">
                     <h1 className="text-5xl md:text-6xl font-bold text-white">
                         About <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-yellow-400">Bhavana</span>
@@ -27,7 +27,7 @@ export default function About() {
             </section>
 
             {/* Main Content */}
-            <section className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-24 px-6">
+            <section className=" py-24 px-6">
                 <div className="max-w-7xl mx-auto">
 
                     <ScrollReveal>

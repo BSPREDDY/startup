@@ -23,7 +23,7 @@ export default function Hero() {
     };
 
     return (
-        <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center overflow-hidden pt-20 pb-20">
+        <section className="relative min-h-screen  items-center justify-center overflow-hidden pt-20 pb-20">
             {/* Subtle background elements */}
             <div className="absolute inset-0 opacity-30">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-blue-600/20 rounded-full blur-3xl animate-pulse"></div>

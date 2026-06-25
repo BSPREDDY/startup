@@ -12,7 +12,7 @@ export default function Contact() {
             </Helmet>
 
             {/* Gradient Background (lightweight alternative to 3D) */}
-            <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"></div>
+            <div className="fixed inset-0 -z-10"></div>
 
             <section
                 className="

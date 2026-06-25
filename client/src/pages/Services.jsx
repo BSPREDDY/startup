@@ -144,7 +144,7 @@ export default function Services() {
             </Helmet>
 
             {/* Hero Section with Gradient Background */}
-            <section className="relative min-h-96 md:min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-900 via-slate-900 to-slate-900 py-20">
+            <section className="relative min-h-96 md:min-h-screen flex items-center justify-center overflow-hidden py-20">
                 <div className="text-center px-6">
                     <h1 className="text-5xl md:text-7xl font-bold mb-4 text-white">
                         Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-yellow-400">Services</span>
@@ -156,7 +156,7 @@ export default function Services() {
             </section>
 
             {/* Main Services Section */}
-            <section className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-20 px-6">
+            <section className="py-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     <ScrollReveal>
                         <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white text-center">
@@ -184,7 +184,7 @@ export default function Services() {
             </section>
 
             {/* Testing Services Section */}
-            <section className="bg-gradient-to-br from-slate-800 via-slate-900 to-blue-900 py-20 px-6">
+            <section className=" py-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     <ScrollReveal>
                         <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white text-center">
@@ -214,7 +214,7 @@ export default function Services() {
             </section>
 
             {/* Why Choose Us Section */}
-            <section className="bg-gradient-to-br from-slate-900 to-slate-800 py-20 px-6">
+            <section className=" py-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     <ScrollReveal>
                         <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white text-center">
@@ -242,7 +242,7 @@ export default function Services() {
             </section>
 
             {/* CTA Section */}
-            <section className="bg-gradient-to-r from-blue-600 to-blue-700 py-16 px-6">
+            <section className=" py-16 px-6">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-4xl font-bold text-white mb-4">
                         Ready to Build Something Great?

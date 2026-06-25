@@ -39,7 +39,7 @@ export default function Home() {
             <Hero />
 
             {/* Services Section */}
-            <section className="py-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+            <section className="py-20">
                 <div className="max-w-6xl mx-auto px-6">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -76,7 +76,7 @@ export default function Home() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+            <section className="py-20">
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}

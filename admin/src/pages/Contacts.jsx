@@ -27,11 +27,15 @@ export const Contacts = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [stats, setStats] = useState({ total: 0, new: 0, read: 0, replied: 0, spam: 0 });
     const [showStatusDropdown, setShowStatusDropdown] = useState(null);
+    const [loadingActions, setLoadingActions] = useState({});
+    const [actionMessage, setActionMessage] = useState({ type: '', text: '' });
+    const [actionDebounce, setActionDebounce] = useState({});
+    const [statusOptions] = useState(['new', 'read', 'replied']);
 
     useEffect(() => {
         fetchContacts();
         fetchStats();
-    }, [currentPage, statusFilter]);
+    }, [currentPage, statusFilter, searchTerm]);
 
     const fetchContacts = async () => {
         setIsLoading(true);
@@ -40,12 +44,13 @@ export const Contacts = () => {
                 page: currentPage,
                 limit: 10,
                 ...(statusFilter && { status: statusFilter }),
+                ...(searchTerm && { search: searchTerm }),
             };
             const response = await contactService.getAllContacts(params);
             setContacts(response.contacts);
             setTotalPages(response.totalPages);
         } catch (error) {
-            console.error('Failed to fetch contacts:', error);
+            console.error('[v0] Failed to fetch contacts:', error);
         } finally {
             setIsLoading(false);
         }
@@ -56,40 +61,116 @@ export const Contacts = () => {
             const response = await contactService.getStats();
             setStats(response.stats);
         } catch (error) {
-            console.error('Failed to fetch stats:', error);
+            console.error('[v0] Failed to fetch stats:', error);
         }
     };
 
     const handleStatusChange = async (contactId, newStatus) => {
+        // Debounce check
+        if (actionDebounce[`status-${contactId}`]) {
+            return;
+        }
+
+        setLoadingActions(prev => ({ ...prev, [contactId]: 'status' }));
+        setActionMessage({ type: '', text: '' });
+        setActionDebounce(prev => ({ ...prev, [`status-${contactId}`]: true }));
+
         try {
             await contactService.updateContactStatus(contactId, newStatus);
             setShowStatusDropdown(null);
-            fetchContacts();
-            fetchStats();
+            setActionMessage({ type: 'success', text: 'Status updated successfully' });
+
+            // Refresh data
+            setTimeout(() => {
+                fetchContacts();
+                fetchStats();
+            }, 300);
         } catch (error) {
-            console.error('Failed to update status:', error);
+            console.error('[v0] Failed to update status:', error);
+            setActionMessage({ type: 'error', text: 'Failed to update status. Please try again.' });
+        } finally {
+            setLoadingActions(prev => ({ ...prev, [contactId]: null }));
+
+            // Remove debounce after 1 second
+            setTimeout(() => {
+                setActionDebounce(prev => {
+                    const newDebounce = { ...prev };
+                    delete newDebounce[`status-${contactId}`];
+                    return newDebounce;
+                });
+            }, 1000);
         }
     };
 
     const handleMarkSpam = async (contactId, isSpam) => {
+        // Debounce check
+        if (actionDebounce[`spam-${contactId}`]) {
+            return;
+        }
+
+        setLoadingActions(prev => ({ ...prev, [contactId]: 'spam' }));
+        setActionMessage({ type: '', text: '' });
+        setActionDebounce(prev => ({ ...prev, [`spam-${contactId}`]: true }));
+
         try {
             await contactService.markAsSpam(contactId, isSpam);
-            fetchContacts();
-            fetchStats();
+            setActionMessage({ type: 'success', text: `Marked as ${isSpam ? 'spam' : 'not spam'} successfully` });
+
+            setTimeout(() => {
+                fetchContacts();
+                fetchStats();
+            }, 300);
         } catch (error) {
-            console.error('Failed to mark spam:', error);
+            console.error('[v0] Failed to mark spam:', error);
+            setActionMessage({ type: 'error', text: 'Failed to update spam status. Please try again.' });
+        } finally {
+            setLoadingActions(prev => ({ ...prev, [contactId]: null }));
+
+            setTimeout(() => {
+                setActionDebounce(prev => {
+                    const newDebounce = { ...prev };
+                    delete newDebounce[`spam-${contactId}`];
+                    return newDebounce;
+                });
+            }, 1000);
         }
     };
 
     const handleDelete = async (contactId) => {
-        if (window.confirm('Are you sure you want to delete this contact?')) {
-            try {
-                await contactService.deleteContact(contactId);
+        if (!window.confirm('Are you sure you want to delete this contact? This action cannot be undone.')) {
+            return;
+        }
+
+        // Debounce check
+        if (actionDebounce[`delete-${contactId}`]) {
+            return;
+        }
+
+        setLoadingActions(prev => ({ ...prev, [contactId]: 'delete' }));
+        setActionMessage({ type: '', text: '' });
+        setActionDebounce(prev => ({ ...prev, [`delete-${contactId}`]: true }));
+
+        try {
+            await contactService.deleteContact(contactId);
+            setActionMessage({ type: 'success', text: 'Contact deleted successfully' });
+
+            setTimeout(() => {
                 fetchContacts();
                 fetchStats();
-            } catch (error) {
-                console.error('Failed to delete contact:', error);
-            }
+            }, 300);
+        } catch (error) {
+            console.error('[v0] Failed to delete contact:', error);
+            setActionMessage({ type: 'error', text: 'Failed to delete contact. Please try again.' });
+        } finally {
+            setLoadingActions(prev => ({ ...prev, [contactId]: null }));
+
+            setTimeout(() => {
+                setActionDebounce(prev => {
+                    const newDebounce = { ...prev };
+                    delete newDebounce[`delete-${contactId}`];
+                    return newDebounce;
+                });
+            }, 1000);
         }
     };
 
@@ -117,8 +198,8 @@ export const Contacts = () => {
                     transition={{ duration: 0.5 }}
                     className="mb-8"
                 >
-                    <h1 className="text-4xl font-bold text-white mb-2">Contacts Management</h1>
-                    <p className="text-slate-400">Manage and track all client inquiries</p>
+                    <h1 className="text-5xl font-bold text-white mb-2">Contacts Management</h1>
+                    <p className="text-slate-400 text-base">Manage and track all client inquiries</p>
                 </motion.div>
 
                 {/* Stats Cards */}
@@ -126,7 +207,7 @@ export const Contacts = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
-                    className="grid grid-cols-1 md:grid-cols-5 gap-4"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
                 >
                     <div className="bg-gradient-to-br from-slate-800 to-slate-700 border border-blue-500/20 rounded-lg p-6 hover:border-blue-400/50 transition-all">
                         <div className="flex items-center justify-between">
@@ -174,6 +255,27 @@ export const Contacts = () => {
                         </div>
                     </div>
                 </motion.div>
+
+                {/* Action Message Display */}
+                {actionMessage.text && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className={`mx-2 px-4 py-3 rounded-lg flex items-center justify-between ${actionMessage.type === 'success'
+                            ? 'bg-green-500/20 border border-green-500/50 text-green-300'
+                            : 'bg-red-500/20 border border-red-500/50 text-red-300'
+                            }`}
+                    >
+                        <span>{actionMessage.text}</span>
+                        <button
+                            onClick={() => setActionMessage({ type: '', text: '' })}
+                            className="ml-4 text-lg hover:opacity-70"
+                        >
+                            ✕
+                        </button>
+                    </motion.div>
+                )}
 
                 {/* Filters */}
                 <motion.div
@@ -303,7 +405,10 @@ export const Contacts = () => {
                                                     <motion.button
                                                         whileHover={{ scale: 1.1 }}
                                                         whileTap={{ scale: 0.95 }}
-                                                        onClick={() => setSelectedContact(contact)}
+                                                        onClick={() => {
+                                                            setSelectedContact(contact);
+                                                            setShowModal(true);
+                                                        }}
                                                         className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors"
                                                         title="View details"
                                                     >
@@ -313,10 +418,14 @@ export const Contacts = () => {
                                                     {/* Status Change Dropdown */}
                                                     <div className="relative">
                                                         <motion.button
-                                                            whileHover={{ scale: 1.1 }}
-                                                            whileTap={{ scale: 0.95 }}
-                                                            onClick={() => setShowStatusDropdown(showStatusDropdown === contact._id ? null : contact._id)}
-                                                            className="p-2 text-yellow-400 hover:bg-yellow-500/20 rounded-lg transition-colors"
+                                                            whileHover={loadingActions[contact._id] !== 'status' ? { scale: 1.1 } : {}}
+                                                            whileTap={loadingActions[contact._id] !== 'status' ? { scale: 0.95 } : {}}
+                                                            onClick={() => loadingActions[contact._id] !== 'status' && setShowStatusDropdown(showStatusDropdown === contact._id ? null : contact._id)}
+                                                            disabled={loadingActions[contact._id] === 'status'}
+                                                            className={`p-2 rounded-lg transition-colors ${loadingActions[contact._id] === 'status'
+                                                                ? 'text-yellow-400 bg-yellow-500/30 opacity-50 cursor-not-allowed'
+                                                                : 'text-yellow-400 hover:bg-yellow-500/20'
+                                                                }`}
                                                             title="Change status"
                                                         >
                                                             <FiCheck size={18} />
@@ -344,10 +453,16 @@ export const Contacts = () => {
 
                                                     {/* Spam Toggle */}
                                                     <motion.button
-                                                        whileHover={{ scale: 1.1 }}
-                                                        whileTap={{ scale: 0.95 }}
-                                                        onClick={() => handleMarkSpam(contact._id, !contact.isSpam)}
-                                                        className={`p-2 rounded-lg transition-colors ${contact.isSpam ? 'text-red-400 bg-red-500/20' : 'text-slate-500 hover:bg-red-500/20 hover:text-red-400'}`}
+                                                        whileHover={loadingActions[contact._id] !== 'spam' ? { scale: 1.1 } : {}}
+                                                        whileTap={loadingActions[contact._id] !== 'spam' ? { scale: 0.95 } : {}}
+                                                        onClick={() => loadingActions[contact._id] !== 'spam' && handleMarkSpam(contact._id, !contact.isSpam)}
+                                                        disabled={loadingActions[contact._id] === 'spam'}
+                                                        className={`p-2 rounded-lg transition-colors ${loadingActions[contact._id] === 'spam'
+                                                            ? 'text-red-400 bg-red-500/30 opacity-50 cursor-not-allowed'
+                                                            : contact.isSpam
+                                                                ? 'text-red-400 bg-red-500/20'
+                                                                : 'text-slate-500 hover:bg-red-500/20 hover:text-red-400'
+                                                            }`}
                                                         title={contact.isSpam ? 'Remove from spam' : 'Mark as spam'}
                                                     >
                                                         <FiAlertTriangle size={18} />
@@ -355,10 +470,14 @@ export const Contacts = () => {
 
                                                     {/* Delete */}
                                                     <motion.button
-                                                        whileHover={{ scale: 1.1 }}
-                                                        whileTap={{ scale: 0.95 }}
-                                                        onClick={() => handleDelete(contact._id)}
-                                                        className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                                                        whileHover={loadingActions[contact._id] !== 'delete' ? { scale: 1.1 } : {}}
+                                                        whileTap={loadingActions[contact._id] !== 'delete' ? { scale: 0.95 } : {}}
+                                                        onClick={() => loadingActions[contact._id] !== 'delete' && handleDelete(contact._id)}
+                                                        disabled={loadingActions[contact._id] === 'delete'}
+                                                        className={`p-2 rounded-lg transition-colors ${loadingActions[contact._id] === 'delete'
+                                                            ? 'text-red-400 bg-red-500/30 opacity-50 cursor-not-allowed'
+                                                            : 'text-red-400 hover:bg-red-500/20'
+                                                            }`}
                                                         title="Delete contact"
                                                     >
                                                         <FiTrash2 size={18} />
@@ -398,6 +517,106 @@ export const Contacts = () => {
                         >
                             Next
                         </button>
+                    </motion.div>
+                )}
+
+                {/* Contact Details Modal */}
+                {showModal && selectedContact && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowModal(false)}
+                        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-gradient-to-br from-slate-800 to-slate-700 border border-blue-500/30 rounded-lg p-6 w-full max-w-md mx-auto"
+                        >
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-bold text-white">Contact Details</h2>
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="text-slate-400 hover:text-white transition-colors"
+                                >
+                                    <FiX size={24} />
+                                </button>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="space-y-5">
+                                {/* Name */}
+                                <div>
+                                    <label className="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-2">
+                                        <FiUser className="inline mr-2" />
+                                        Name
+                                    </label>
+                                    <p className="text-white text-lg">{selectedContact.name}</p>
+                                </div>
+
+                                {/* Email */}
+                                <div>
+                                    <label className="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-2">
+                                        <FiMail className="inline mr-2" />
+                                        Email
+                                    </label>
+                                    <p className="text-white break-all">{selectedContact.email}</p>
+                                </div>
+
+                                {/* Message */}
+                                <div>
+                                    <label className="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-2">
+                                        <FiMessageSquare className="inline mr-2" />
+                                        Message
+                                    </label>
+                                    <p className="text-slate-300 bg-slate-900/50 p-3 rounded border border-slate-600 max-h-32 overflow-y-auto">
+                                        {selectedContact.message}
+                                    </p>
+                                </div>
+
+                                {/* Status */}
+                                <div>
+                                    <label className="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-2">
+                                        Status
+                                    </label>
+                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${selectedContact.status === 'new'
+                                        ? 'bg-yellow-500/20 text-yellow-300'
+                                        : selectedContact.status === 'read'
+                                            ? 'bg-blue-500/20 text-blue-300'
+                                            : 'bg-green-500/20 text-green-300'
+                                        }`}>
+                                        {selectedContact.status?.charAt(0).toUpperCase() + selectedContact.status?.slice(1)}
+                                    </span>
+                                </div>
+
+                                {/* Spam Status */}
+                                <div>
+                                    <label className="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-2">
+                                        Spam Status
+                                    </label>
+                                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${selectedContact.isSpam
+                                        ? 'bg-red-500/20 text-red-300'
+                                        : 'bg-green-500/20 text-green-300'
+                                        }`}>
+                                        {selectedContact.isSpam ? 'Marked as Spam' : 'Not Spam'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="mt-8 flex gap-3">
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors font-medium"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </div>

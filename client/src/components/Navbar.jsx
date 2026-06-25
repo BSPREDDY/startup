@@ -28,15 +28,20 @@ export default function Navbar() {
         p-5
         "
             >
-                <h2
-                    className="
-          font-bold
-          text-xl
-          gradient-text
-          "
-                >
-                    Bhavana Technology's
-                </h2>
+                <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg flex items-center justify-center font-bold text-white text-sm shadow-lg">
+                        BTSS
+                    </div>
+                    <h2
+                        className="
+              font-bold
+              text-xl
+              gradient-text
+              "
+                    >
+                        Bhavana Technology
+                    </h2>
+                </div>
 
                 {/* Desktop Menu */}
                 <div className="hidden md:flex gap-8">

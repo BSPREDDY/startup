@@ -46,8 +46,8 @@ export const Dashboard = () => {
                     transition={{ duration: 0.5 }}
                     className="mb-8"
                 >
-                    <h1 className="text-4xl font-bold text-white mb-2">Dashboard</h1>
-                    <p className="text-slate-300 text-lg">Welcome to Bhavana Technology Admin Panel</p>
+                    <h1 className="text-5xl font-bold text-white mb-2">Dashboard</h1>
+                    <p className="text-slate-400 text-base">Welcome to Bhavana Technology Admin Panel</p>
                 </motion.div>
 
                 {isLoading ? (
