@@ -13,7 +13,6 @@ app.use(cors({
     origin: [
         process.env.CLIENT_URL || "http://localhost:5173",
         process.env.ADMIN_URL || "http://localhost:5174",
-        process.env.MANAGER_URL || "http://localhost:5175"
     ],
     credentials: true
 }));
