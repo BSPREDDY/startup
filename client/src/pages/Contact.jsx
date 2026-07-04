@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import ContactForm from "../components/ContactForm";
+import { motion } from 'framer-motion';
 
 export default function Contact() {
     return (
@@ -29,18 +30,28 @@ export default function Contact() {
         "
             >
 
-                <div className="mb-12">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="mb-12"
+                >
                     <h1 className="text-5xl md:text-6xl font-bold mb-4 text-white">
                         Let's <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-yellow-400">Connect</span>
                     </h1>
                     <p className="text-lg text-blue-200">
-                        Have a project in mind? Let's discuss how we can help bring your vision to life.
+                        Have a groundbreaking project in mind? Let's collaborate to bring your vision to life.
                     </p>
-                </div>
+                </motion.div>
 
-                <div className="bg-gradient-to-br from-slate-800 to-slate-700 border border-blue-500/30 p-8 md:p-12 rounded-lg backdrop-blur-sm">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                    className="bg-slate-700/10 border border-blue-500/30 p-8 md:p-12 rounded-lg backdrop-blur-sm shadow-xl"
+                >
                     <ContactForm />
-                </div>
+                </motion.div>
 
             </section>
         </>

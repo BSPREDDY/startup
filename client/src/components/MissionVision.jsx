@@ -46,7 +46,8 @@ const MissionVision = () => {
                 className="max-w-6xl mx-auto"
                 variants={containerVariants}
                 initial="hidden"
-                animate="visible"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.1 }}
             >
                 {/* Section Header */}
                 <motion.div className="text-center mb-16 md:mb-24" variants={itemVariants}>
@@ -70,7 +71,7 @@ const MissionVision = () => {
                     >
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-cyan-600/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                        <div className="relative bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-8 md:p-10 hover:border-blue-500/40 transition-all duration-300">
+                        <div className="relative bg-slate-700/10 rounded-2xl border border-blue-500/20 p-8 md:p-10 hover:border-blue-500/40 transition-all duration-300">
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="p-3 bg-blue-500/20 rounded-lg">
                                     <FiTarget className="text-2xl text-blue-400" />
@@ -107,7 +108,7 @@ const MissionVision = () => {
                     >
                         <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/20 to-blue-600/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                        <div className="relative bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-xl rounded-2xl border border-cyan-500/20 p-8 md:p-10 hover:border-cyan-500/40 transition-all duration-300">
+                        <div className="relative bg-slate-700/10 rounded-2xl border border-cyan-500/20 p-8 md:p-10 hover:border-cyan-500/10 transition-all duration-300">
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="p-3 bg-cyan-500/20 rounded-lg">
                                     <FiEye className="text-2xl text-cyan-400" />
@@ -178,7 +179,7 @@ const MissionVision = () => {
                                     },
                                 }}
                             >
-                                <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6 hover:border-blue-500/50 transition-all duration-300 h-full group-hover:shadow-lg group-hover:shadow-blue-500/10">
+                                <div className="bg-slate-700/20 rounded-xl border border-slate-700/100 p-6 hover:border-blue-500/50 transition-all duration-300 h-full group-hover:shadow-lg group-hover:shadow-blue-500/10">
                                     <div className="text-4xl mb-4">{value.icon}</div>
                                     <h4 className="text-lg font-semibold text-white mb-2">{value.title}</h4>
                                     <p className="text-slate-400 text-sm leading-relaxed">{value.description}</p>

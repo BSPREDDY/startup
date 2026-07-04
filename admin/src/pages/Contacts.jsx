@@ -12,6 +12,7 @@ import {
     FiUser,
     FiMessageSquare,
     FiChevronDown,
+    FiSend,
 } from 'react-icons/fi';
 import { MainLayout } from '../layouts/MainLayout';
 import { contactService } from '../services/contactService';
@@ -26,6 +27,9 @@ export const Contacts = () => {
     const [statusFilter, setStatusFilter] = useState(initialFilter);
     const [selectedContact, setSelectedContact] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [showReplyCard, setShowReplyCard] = useState(false);
+    const [replyMessage, setReplyMessage] = useState('');
+    const [isSendingReply, setIsSendingReply] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [stats, setStats] = useState({ total: 0, new: 0, read: 0, replied: 0, spam: 0 });
@@ -218,6 +222,30 @@ export const Contacts = () => {
                     return newDebounce;
                 });
             }, 1000);
+        }
+    };
+
+    const handleSendReply = async () => {
+        if (!replyMessage.trim()) {
+            setActionMessage({ type: 'error', text: 'Reply message cannot be empty' });
+            return;
+        }
+        setIsSendingReply(true);
+        setActionMessage({ type: '', text: '' });
+        try {
+            await contactService.replyToContact(selectedContact._id, replyMessage);
+            setActionMessage({ type: 'success', text: 'Reply sent successfully' });
+            setReplyMessage('');
+            setShowReplyCard(false);
+            
+            setContacts(prev => prev.map(c => c._id === selectedContact._id ? { ...c, status: 'replied' } : c));
+            setSelectedContact(prev => ({ ...prev, status: 'replied' }));
+            fetchStats();
+        } catch (error) {
+            console.error('[v0] Failed to send reply:', error);
+            setActionMessage({ type: 'error', text: error.response?.data?.message || 'Failed to send reply' });
+        } finally {
+            setIsSendingReply(false);
         }
     };
 
@@ -470,7 +498,26 @@ export const Contacts = () => {
                                         >
                                             <td className="px-6 py-4 text-sm text-white font-medium">{contact.name}</td>
                                             <td className="px-6 py-4 text-sm text-slate-300 break-all">{contact.email}</td>
-                                            <td className="px-6 py-4 text-sm text-slate-300 max-w-xs truncate">{contact.message}</td>
+                                            <td 
+                                                className="px-6 py-4 text-sm text-slate-300 max-w-xs truncate cursor-pointer hover:text-blue-400 transition-colors"
+                                                title="Click to view and reply"
+                                                onClick={async () => {
+                                                    setSelectedContact(contact);
+                                                    setShowModal(true);
+                                                    setShowReplyCard(true);
+                                                    if (contact.status === 'new') {
+                                                        try {
+                                                            await contactService.updateContactStatus(contact._id, 'read');
+                                                            setContacts(prev => prev.map(c => c._id === contact._id ? { ...c, status: 'read' } : c));
+                                                            fetchStats();
+                                                        } catch (err) {
+                                                            console.error('[v0] Auto mark as read failed:', err);
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                {contact.message}
+                                            </td>
                                             <td className="px-6 py-4 text-sm">{getStatusBadge(contact.status)}</td>
                                             <td className="px-6 py-4 text-sm">
                                                 <div className="flex items-center gap-3">
@@ -607,7 +654,7 @@ export const Contacts = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={() => setShowModal(false)}
+                        onClick={() => { setShowModal(false); setShowReplyCard(false); setReplyMessage(''); }}
                         className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                     >
                         <motion.div
@@ -615,13 +662,13 @@ export const Contacts = () => {
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-gradient-to-br from-slate-800 to-slate-700 border border-blue-500/30 rounded-lg p-6 w-full max-w-md mx-auto shadow-2xl"
+                            className="bg-gradient-to-br from-slate-800 to-slate-700 border border-blue-500/30 rounded-lg p-6 w-full max-w-lg mx-auto shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto"
                         >
                             {/* Modal Header */}
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-white">Contact Details</h2>
                                 <button
-                                    onClick={() => setShowModal(false)}
+                                    onClick={() => { setShowModal(false); setShowReplyCard(false); setReplyMessage(''); }}
                                     className="text-slate-400 hover:text-white transition-colors"
                                 >
                                     <FiX size={24} />
@@ -661,10 +708,20 @@ export const Contacts = () => {
 
                                 {/* Message */}
                                 <div>
-                                    <label className="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-2">
-                                        <FiMessageSquare className="inline mr-2" />
-                                        Message
-                                    </label>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <label className="block text-xs uppercase tracking-wider font-semibold text-slate-400">
+                                            <FiMessageSquare className="inline mr-2" />
+                                            Message
+                                        </label>
+                                        {!showReplyCard && (
+                                            <button 
+                                                onClick={() => setShowReplyCard(true)}
+                                                className="text-xs bg-green-500/20 text-green-400 hover:bg-green-500/40 px-2 py-1 rounded transition-colors"
+                                            >
+                                                Reply
+                                            </button>
+                                        )}
+                                    </div>
                                     <p className="text-slate-300 bg-slate-900/50 p-3 rounded border border-slate-600 max-h-32 overflow-y-auto">
                                         {selectedContact.message}
                                     </p>
@@ -699,10 +756,53 @@ export const Contacts = () => {
                                 </div>
                             </div>
 
+                            {/* Reply Card Section */}
+                            {showReplyCard && (
+                                <motion.div 
+                                    initial={{ opacity: 0, height: 0 }} 
+                                    animate={{ opacity: 1, height: 'auto' }} 
+                                    className="mt-6 border-t border-slate-600 pt-4"
+                                >
+                                    <label className="block text-xs uppercase tracking-wider font-semibold text-slate-400 mb-2">
+                                        <FiSend className="inline mr-2" />
+                                        Reply Message
+                                    </label>
+                                    <textarea
+                                        value={replyMessage}
+                                        onChange={(e) => setReplyMessage(e.target.value)}
+                                        placeholder={`Write your reply to ${selectedContact.name}...`}
+                                        className="w-full h-32 bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500 resize-none"
+                                    ></textarea>
+                                    <div className="flex justify-end gap-3 mt-3">
+                                        <button
+                                            onClick={() => setShowReplyCard(false)}
+                                            className="px-4 py-2 text-sm text-slate-300 hover:text-white transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleSendReply}
+                                            disabled={isSendingReply}
+                                            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+                                        >
+                                            {isSendingReply ? 'Sending...' : 'Send Reply'}
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+
                             {/* Modal Footer */}
-                            <div className="mt-8 flex gap-3">
+                            <div className="mt-6 flex gap-3">
+                                {!showReplyCard && (
+                                    <button
+                                        onClick={() => setShowReplyCard(true)}
+                                        className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-all font-semibold border border-slate-600"
+                                    >
+                                        Reply
+                                    </button>
+                                )}
                                 <button
-                                    onClick={() => setShowModal(false)}
+                                    onClick={() => { setShowModal(false); setShowReplyCard(false); setReplyMessage(''); }}
                                     className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-all font-semibold shadow-lg hover:shadow-blue-500/30"
                                 >
                                     Close

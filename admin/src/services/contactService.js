@@ -84,4 +84,15 @@ export const contactService = {
             };
         }
     },
+
+    replyToContact: async (id, replyMessage) => {
+        try {
+            if (!id || !replyMessage) throw new Error('ID and reply message are required');
+            const response = await api.post(`/admin/contacts/${id}/reply`, { replyMessage });
+            return response.data;
+        } catch (error) {
+            console.error('[v0] Error sending reply:', error.message);
+            throw error;
+        }
+    },
 };

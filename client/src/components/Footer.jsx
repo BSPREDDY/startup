@@ -36,6 +36,10 @@ export default function Footer() {
                     Quality Assured
                 </div>
 
+                <div className="mt-8 text-sm text-gray-500">
+                    &copy; {new Date().getFullYear()} Bhavana Technology and Software Solutions. All rights reserved.
+                </div>
+
             </div>
         </footer>
     );

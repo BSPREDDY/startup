@@ -1,4 +1,5 @@
 const Contact = require("../models/Contact");
+const { sendEmail } = require("../utils/emailUtils");
 
 const getAllContacts = async (req, res) => {
     try {
@@ -194,6 +195,56 @@ const getStats = async (req, res) => {
     }
 };
 
+const replyToContact = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { replyMessage } = req.body;
+
+        if (!replyMessage) {
+            return res.status(400).json({ success: false, message: "Reply message is required" });
+        }
+
+        const contact = await Contact.findById(id);
+        if (!contact) {
+            return res.status(404).json({ success: false, message: "Contact not found" });
+        }
+
+        const subject = `Re: Your inquiry to Bhavana Technology`;
+        const text = `Hi ${contact.name},\n\nThank you for reaching out to us.\n\n${replyMessage}\n\nBest regards,\nBhavana Technology Team`;
+        const html = `
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <p>Hi ${contact.name},</p>
+                <p>Thank you for reaching out to us. We have received your message and here is our response:</p>
+                <blockquote style="border-left: 4px solid #3b82f6; padding-left: 15px; margin: 20px 0; font-style: italic; color: #555;">
+                    ${replyMessage.replace(/\n/g, '<br>')}
+                </blockquote>
+                <p>Best regards,<br><strong>Bhavana Technology Team</strong></p>
+            </div>
+        `;
+        
+        await sendEmail(contact.email, subject, text, html);
+
+        const updatedContact = await Contact.findByIdAndUpdate(
+            id,
+            { status: 'replied' },
+            { returnDocument: 'after' }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Reply sent successfully",
+            contact: updatedContact,
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to send reply",
+        });
+    }
+};
+
 module.exports = {
     getAllContacts,
     getContactById,
@@ -201,4 +252,5 @@ module.exports = {
     markAsSpam,
     deleteContact,
     getStats,
+    replyToContact,
 };

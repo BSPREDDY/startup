@@ -22,6 +22,7 @@ import {
 
 import ServiceCard from "../components/ServiceCard";
 import ScrollReveal from "../components/ScrollReveal";
+import { motion } from 'framer-motion';
 
 // Main Services
 const mainServices = [
@@ -204,7 +205,7 @@ export default function Services() {
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {mainServices.map((service, index) => (
                             <ScrollReveal key={index} delay={index * 0.08}>
-                                <div className="bg-gradient-to-br from-slate-800 to-slate-700 border border-blue-500/30 p-8 rounded-lg hover:border-blue-400/60 transition-all group cursor-pointer">
+                                <div className="bg-slate-700/10 border border-blue-500/30 p-8 rounded-lg hover:border-blue-400/60 transition-all group cursor-pointer">
                                     <div className="text-blue-400 mb-4 group-hover:text-yellow-400 transition-colors">
                                         {service.icon}
                                     </div>
@@ -232,7 +233,7 @@ export default function Services() {
                     <div className="grid md:grid-cols-2 gap-6">
                         {testingServices.map((service, index) => (
                             <ScrollReveal key={index} delay={index * 0.05}>
-                                <div className="bg-slate-700/50 border border-blue-400/40 p-6 rounded-lg hover:bg-slate-700 transition-all flex gap-4">
+                                <div className="bg-slate-700/10 border border-blue-400/40 p-6 rounded-lg hover:bg-slate-700/50 transition-all flex gap-4">
                                     <div className="text-blue-400 text-2xl min-w-fit">
                                         {service.icon}
                                     </div>
@@ -262,7 +263,7 @@ export default function Services() {
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {devopsServices.map((service, index) => (
                             <ScrollReveal key={index} delay={index * 0.08}>
-                                <div className="bg-gradient-to-br from-slate-800 to-slate-700 border border-blue-500/30 p-8 rounded-lg hover:border-blue-400/60 transition-all group cursor-pointer">
+                                <div className="bg-slate-700/10 border border-blue-500/30 p-8 rounded-lg hover:border-blue-400/60 transition-all group cursor-pointer">
                                     <div className="text-blue-400 mb-4 group-hover:text-yellow-400 transition-colors">
                                         {service.icon}
                                     </div>
@@ -305,17 +306,23 @@ export default function Services() {
 
             {/* CTA Section */}
             <section className=" py-16 px-6">
-                <div className="max-w-4xl mx-auto text-center">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    className="max-w-4xl mx-auto text-center"
+                >
                     <h2 className="text-4xl font-bold text-white mb-4">
                         Ready to Build Something Great?
                     </h2>
                     <p className="text-blue-100 text-lg mb-8">
-                        Let's discuss your project and create the perfect solution
+                        Let's discuss your next big project and craft the perfect digital solution.
                     </p>
-                    <a href="/contact" className="inline-block bg-yellow-400 text-slate-900 px-8 py-4 rounded-lg font-bold hover:bg-yellow-300 transition-colors">
+                    <a href="/contact" className="inline-block bg-yellow-400 text-slate-900 px-8 py-4 rounded-lg font-bold hover:bg-yellow-300 transition-colors shadow-lg hover:shadow-yellow-400/20">
                         Get Started Today
                     </a>
-                </div>
+                </motion.div>
             </section>
         </>
     );
