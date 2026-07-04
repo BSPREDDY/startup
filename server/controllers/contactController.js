@@ -1,8 +1,7 @@
 const Contact =
     require("../models/Contact");
 
-const nodemailer =
-    require("nodemailer");
+const { sendEmail } = require("../utils/emailUtils");
 
 const sendMessage = async (
     req,
@@ -40,60 +39,21 @@ const sendMessage = async (
         // Only send emails if configuration is available
         if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
             try {
-                const transporter =
-                    nodemailer.createTransport({
-                        service: "gmail",
-                        auth: {
-                            user:
-                                process.env.EMAIL_USER,
-                            pass:
-                                process.env.EMAIL_PASS,
-                        },
-                    });
-
                 // Send email to admin
-                await transporter.sendMail({
-                    from:
-                        process.env.EMAIL_USER,
-
-                    to:
-                        "surya@bhavanatss.com",
-
-                    subject:
-                        "New Website Inquiry",
-
-                    html: `
-            <h2>New Lead Received</h2>
-
-            <p><b>Name:</b> ${name}</p>
-
-            <p><b>Email:</b> ${email}</p>
-            ${phone ? `<p><b>Phone:</b> ${phone}</p>` : ''}
-
-            <p><b>Message:</b> ${message}</p>
-          `,
-                });
+                await sendEmail(
+                    process.env.EMAIL_USER || "surya@bhavanatss.com",
+                    "New Website Inquiry",
+                    `New Lead Received\nName: ${name}\nEmail: ${email}\n${phone ? `Phone: ${phone}\n` : ''}Message: ${message}`,
+                    `<h2>New Lead Received</h2><p><b>Name:</b> ${name}</p><p><b>Email:</b> ${email}</p>${phone ? `<p><b>Phone:</b> ${phone}</p>` : ''}<p><b>Message:</b> ${message}</p>`
+                );
 
                 // Send confirmation email to user
-                await transporter.sendMail({
-                    from:
-                        process.env.EMAIL_USER,
-
-                    to: email,
-
-                    subject:
-                        "Thank You For Contacting Bhavana Technology and software solutions",
-
-                    html: `
-          <div style="font-family:Arial; padding:20px;">
-            <h2>Thank You</h2>
-            <p>We have received your message.</p>
-            <p>Our team will contact you shortly.</p>
-            <br>
-            <b>Bhavana Technology and software solutions</b>
-          </div>
-          `,
-                });
+                await sendEmail(
+                    email,
+                    "Thank You For Contacting Bhavana Technology and software solutions",
+                    "Thank You. We have received your message. Our team will contact you shortly. Bhavana Technology and software solutions",
+                    `<div style="font-family:Arial; padding:20px;"><h2>Thank You</h2><p>We have received your message.</p><p>Our team will contact you shortly.</p><br><b>Bhavana Technology and software solutions</b></div>`
+                );
 
                 console.log('[v0] Emails sent successfully');
             } catch (emailError) {

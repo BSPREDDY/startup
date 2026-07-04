@@ -240,7 +240,7 @@ const replyToContact = async (req, res) => {
         console.log(error);
         res.status(500).json({
             success: false,
-            message: "Failed to send reply",
+            message: error.message || "Failed to send reply",
         });
     }
 };

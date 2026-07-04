@@ -1,14 +1,19 @@
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
+const getTransporter = () => {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        throw new Error('Email credentials (EMAIL_USER, EMAIL_PASS) are not configured');
+    }
+    return nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+};
 
 /**
  * Sends an email
@@ -20,6 +25,7 @@ const transporter = nodemailer.createTransport({
  */
 const sendEmail = async (to, subject, text, html = '') => {
     try {
+        const transporter = getTransporter();
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to,
