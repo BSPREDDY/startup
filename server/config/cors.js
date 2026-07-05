@@ -1,20 +1,15 @@
 const corsConfig = {
     development: {
-        origin: [
-            'http://localhost:5173',
-            'http://localhost:5174',
-            'http://localhost:3000',
-            'http://localhost:3001',
-        ],
+        origin: true,
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
     },
     production: {
         origin: [
+            'https://btss-admin.vercel.app',
             'https://bhavanatss.vercel.app',
-            'https://admin-bhavanatss.vercel.app',
-            'https://bhavanatss-server.vercel.app',
+            'https://bhavanatss-server.vercel.app'
         ],
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

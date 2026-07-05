@@ -3,9 +3,11 @@ const mongoose = require("mongoose");
 const connectDB = async () => {
     try {
 
-        await mongoose.connect(
-            process.env.MONGO_URI
-        );
+        const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
+        if (!uri) {
+            console.warn("MongoDB URI is not set in environment variables!");
+        }
+        await mongoose.connect(uri);
 
         console.log(
             "MongoDB Connected Successfully"
