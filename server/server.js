@@ -57,35 +57,22 @@ app.use((req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-    console.log("");
-    console.log("================================");
-    console.log("  Bhavana Technology API Server");
-    console.log("================================");
-    console.log(`✓ Server running on port ${PORT}`);
-    console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`✓ CORS enabled for:`);
-    console.log(`  - Client: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
-    console.log(`  - Admin: ${process.env.ADMIN_URL || 'http://localhost:5174'}`);
-    console.log(`✓ Database: ${process.env.MONGODB_URI || process.env.MONGO_URI || 'Not configured'}`);
-    console.log("");
-    console.log("Available Endpoints:");
-    console.log("  GET  http://localhost:5000/");
-    console.log("  GET  http://localhost:5000/health");
-    console.log("  POST http://localhost:5000/api/admin/auth/register");
-    console.log("  POST http://localhost:5000/api/admin/auth/login");
-    console.log("  GET  http://localhost:5000/api/admin/auth/verify");
-    console.log("  POST http://localhost:5000/api/contact");
-    console.log("================================");
-    console.log("");
-});
-
-// Graceful shutdown
-process.on("SIGTERM", () => {
-    console.log("SIGTERM received, shutting down gracefully...");
-    server.close(() => {
-        console.log("Server closed");
-        process.exit(0);
+// Start server only if not running in a serverless environment (like Vercel)
+if (process.env.NODE_ENV !== "production") {
+    const PORT = process.env.PORT || 5000;
+    const server = app.listen(PORT, () => {
+        console.log(`✓ Server running on port ${PORT}`);
     });
-});
+
+    // Graceful shutdown
+    process.on("SIGTERM", () => {
+        console.log("SIGTERM received, shutting down gracefully...");
+        server.close(() => {
+            console.log("Server closed");
+            process.exit(0);
+        });
+    });
+}
+
+// Export the app for Vercel serverless deployment
+module.exports = app;
