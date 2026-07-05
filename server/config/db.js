@@ -12,10 +12,9 @@ const connectDB = async () => {
         );
 
     } catch (error) {
-
-        console.log(error.message);
-
-        process.exit(1);
+        console.error("MongoDB Connection Error:", error.message);
+        // Do not process.exit(1) in serverless environments
+        // Just let it log the error, or throw if you want the function to crash cleanly
     }
 };
 
