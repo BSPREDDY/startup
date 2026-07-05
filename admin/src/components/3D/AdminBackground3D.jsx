@@ -295,6 +295,7 @@ export function AdminBackground3D() {
                 failIfMajorPerformanceCaveat: false,
                 stencil: false,
                 precision: 'mediump',
+                preserveDrawingBuffer: true,
             }}
         >
             <AnimatedBackground />

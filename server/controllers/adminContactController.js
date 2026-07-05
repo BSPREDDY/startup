@@ -222,7 +222,20 @@ const replyToContact = async (req, res) => {
             </div>
         `;
         
-        await sendEmail(contact.email, subject, text, html);
+        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+            try {
+                await sendEmail(contact.email, subject, text, html);
+                console.log('[v0] Reply email sent successfully to', contact.email);
+            } catch (emailError) {
+                console.error('[v0] Failed to send reply email:', emailError.message);
+                return res.status(500).json({
+                    success: false,
+                    message: "Failed to send email. Please check your email configuration.",
+                });
+            }
+        } else {
+            console.log('[v0] Email credentials not configured - skipping email sending');
+        }
 
         const updatedContact = await Contact.findByIdAndUpdate(
             id,
@@ -232,7 +245,7 @@ const replyToContact = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: "Reply sent successfully",
+            message: process.env.EMAIL_USER ? "Reply sent successfully" : "Status updated to replied (Email skipped due to missing config)",
             contact: updatedContact,
         });
 
@@ -240,7 +253,7 @@ const replyToContact = async (req, res) => {
         console.log(error);
         res.status(500).json({
             success: false,
-            message: error.message || "Failed to send reply",
+            message: error.message || "Failed to process reply",
         });
     }
 };
